@@ -2,45 +2,40 @@
 
 Turn a README or project note into **three short LinkedIn-style posts** (technical, story, lessons). Built with **Next.js**; your **NVIDIA API key stays on the server only**.
 
-**Application code is in `web/`.** On Vercel, set **Root Directory** to **`web`**.
+The Next.js app lives at the **repository root** (this folder). **Vercel:** leave **Root Directory** empty, or set it to **`.`** — do **not** use `web` (that path no longer exists).
 
 ---
 
-## Push to GitHub (quick)
+## Fix Vercel `404 NOT_FOUND`
 
-From this folder:
+If you see a Vercel 404:
+
+1. **Project → Settings → General → Root Directory** → clear it (must **not** be `web`).
+2. **Deployments → … → Redeploy** the latest commit.
+
+---
+
+## Push to GitHub
 
 ```bash
-git init
 git add -A
-git status   # confirm .env.local and node_modules are NOT listed
-git branch -M main
-git commit -m "Initial commit: FLEX-O-MATIC 5000"
+git status   # .env.local and node_modules must NOT appear
+git commit -m "your message"
+git push
 ```
 
-Create an empty repo on GitHub, then:
-
-```bash
-git remote add origin https://github.com/YOUR_USER/YOUR_REPO.git
-git push -u origin main
-```
-
-**Before you push:** ensure **`web/.env.local`** is not staged (it is ignored by default). Never commit API keys.
-
-Use **one** Git repository at the repo root. Do **not** run `git init` inside `web/`—a nested `.git` there makes GitHub only see an empty `web` folder.
-
-If this folder is **already** initialized (you see a commit), skip `git init` / `git commit` and only add `origin` + `push`.
+**Never commit** `.env.local` or API keys. Only `.env.example` is tracked (empty key).
 
 ---
 
-## What’s in the box
+## What's in the box
 
 | Item | Purpose |
 |------|--------|
 | Retro UI | Marquee, “windows”, three output cards, copy buttons |
-| `POST /api/forge` | Server-side NVIDIA chat calls; supports `slot: tech \| story \| lessons` |
-| Social preview | `opengraph-image` / `twitter-image` (1200×630) + metadata for LinkedIn / X |
-| Security | Same-origin check (when `Origin` is sent), JSON + body limits, HTTPS host allowlist for API URL, upstream timeout, security headers |
+| `POST /api/forge` | Server-side NVIDIA chat; `slot: tech \| story \| lessons` |
+| Social preview | `opengraph-image` / `twitter-image` (1200×630) + metadata |
+| Security | Same-origin when `Origin` is sent, JSON/size limits, HTTPS host allowlist, upstream timeout, security headers |
 
 ---
 
@@ -50,14 +45,13 @@ If this folder is **already** initialized (you see a commit), skip `git init` / 
 .
 ├── README.md
 ├── .gitignore
-└── web/                 ← Vercel root directory
-    ├── app/
-    ├── lib/
-    ├── public/
-    ├── .env.example
-    ├── package.json
-    ├── vercel.json
-    └── ...
+├── app/              # Next.js App Router
+├── lib/
+├── public/
+├── .env.example
+├── package.json
+├── vercel.json
+└── ...
 ```
 
 ---
@@ -65,9 +59,8 @@ If this folder is **already** initialized (you see a commit), skip `git init` / 
 ## Local development
 
 ```bash
-cd web
 cp .env.example .env.local
-# Set NVIDIA_API_KEY in .env.local (never commit this file)
+# Set NVIDIA_API_KEY in .env.local
 npm install
 npm run dev
 ```
@@ -78,30 +71,26 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Deploy on Vercel
 
-1. Import the GitHub repo into Vercel.  
-2. **Root Directory:** `web`  
-3. **Environment variables**
-   - **`NVIDIA_API_KEY`** (required for generation)  
-   - **`NEXT_PUBLIC_SITE_URL`** (e.g. `https://your-app.vercel.app`) for correct Open Graph / link previews  
-   - Optional: `NVIDIA_API_URL`, `NVIDIA_MODEL`, `NVIDIA_API_ALLOWED_HOST_SUFFIXES` — see `web/.env.example`  
-4. Deploy  
+1. Import this repo (or reconnect if already linked).
+2. **Root Directory:** leave **blank** (repo root).
+3. **Environment variables:** `NVIDIA_API_KEY`; `NEXT_PUBLIC_SITE_URL` (your live `https://…` URL); optional vars in `.env.example`.
+4. Deploy.
 
-Refresh cached previews with [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/) if needed.
+Link previews: [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/).
 
 ---
 
 ## Environment variables
 
-| Variable | Scope | Notes |
-|----------|--------|--------|
-| `NVIDIA_API_KEY` | Server only | Required for Forge. Do **not** use `NEXT_PUBLIC_*`. |
-| `NEXT_PUBLIC_SITE_URL` | Public | Your canonical `https://` URL for metadata. |
-| `NVIDIA_API_URL` | Server | Optional override (HTTPS + allowed hosts). |
-| `NVIDIA_MODEL` | Server | Optional model id. |
+| Variable | Notes |
+|----------|--------|
+| `NVIDIA_API_KEY` | Server only. Required for Forge. |
+| `NEXT_PUBLIC_SITE_URL` | Public canonical URL for Open Graph. |
+| `NVIDIA_API_URL`, `NVIDIA_MODEL`, `NVIDIA_API_ALLOWED_HOST_SUFFIXES` | Optional — see `.env.example`. |
 
 ---
 
-## Scripts (`web/`)
+## Scripts
 
 - `npm run dev` — dev server  
 - `npm run build` — production build  
@@ -113,13 +102,12 @@ Refresh cached previews with [LinkedIn Post Inspector](https://www.linkedin.com/
 
 ## Security checklist
 
-- [ ] No `nvapi-` strings or keys in `.env.example`, README, or source.  
-- [ ] `web/.env.local` exists only on your machine and is **gitignored**.  
-- [ ] Keys on Vercel are in **Environment Variables**, not in the repo.  
-- [ ] Rotate any key that was ever committed or leaked.  
+- [ ] No real `nvapi-*` strings in `.env.example` or source.  
+- [ ] `.env.local` is gitignored and never force-added.  
+- [ ] Secrets only in Vercel **Environment Variables**.  
 
 ---
 
 ## License
 
-Your project — add a `LICENSE` file if you want to specify terms.
+Your project — add a `LICENSE` file if you want explicit terms.
