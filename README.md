@@ -6,12 +6,26 @@ The Next.js app lives at the **repository root** (this folder). **Vercel:** leav
 
 ---
 
-## Fix Vercel `404 NOT_FOUND`
+## Fix Vercel `404 NOT_FOUND` (plain “The page could not be found”)
 
-If you see a Vercel 404:
+That response is **Vercel’s edge** (`x-vercel-error: NOT_FOUND`), not the Next.js app. The build can succeed while the **production domain** doesn’t point at a live deployment.
 
-1. **Project → Settings → General → Root Directory** → clear it (must **not** be `web`).
-2. **Deployments → … → Redeploy** the latest commit.
+### Checklist (in order)
+
+1. **Settings → General → Root Directory** → **empty** (not `web`, not a subfolder).
+2. **Settings → General → Build & Development Settings**
+   - **Framework Preset:** **Next.js**
+   - **Build Command:** leave default, or `npm run build`
+   - **Output Directory:** **leave empty** (must **not** be `.next`, `out`, or `dist` unless you know you need it).
+   - **Install Command:** leave default, or `npm install` / `npm ci`.
+3. **Deployments** → open the latest **Production · Ready** deployment → use the **Visit** button. If that URL works but `https://<project>.vercel.app` does not, it’s a **domain** issue (step 4).
+4. **Settings → Domains** → ensure **`<name>.vercel.app`** is listed and **Valid**; remove and re-add it if it’s stuck.
+5. **Git** → Production should track **`main`** and include the latest commit (we ship `next build --webpack` for reliable Vercel output).
+6. Pull latest **`main`** and **Redeploy** if your dashboard was on an old commit.
+
+### Preview URLs return `401`
+
+**Deployment Protection** is on for previews. Use the **production** domain, or temporarily allow unauthenticated previews in **Settings → Deployment Protection**.
 
 ---
 
