@@ -27,6 +27,10 @@ git push -u origin main
 
 **Before you push:** ensure **`web/.env.local`** is not staged (it is ignored by default). Never commit API keys.
 
+Use **one** Git repository at the repo root. Do **not** run `git init` inside `web/`—a nested `.git` there makes GitHub only see an empty `web` folder.
+
+If this folder is **already** initialized (you see a commit), skip `git init` / `git commit` and only add `origin` + `push`.
+
 ---
 
 ## What’s in the box
