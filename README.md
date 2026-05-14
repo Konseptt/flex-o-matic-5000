@@ -50,7 +50,6 @@ git push
 ├── public/
 ├── .env.example
 ├── package.json
-├── vercel.json
 └── ...
 ```
 
