@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+/** Node.js avoids Vercel Edge's ~1 MB function size cap (Satori + deps exceed Edge on Hobby). */
+export const runtime = "nodejs";
 
 export const alt =
   "FLEX-O-MATIC 5000 — drop a project, get three LinkedIn-ready posts";
