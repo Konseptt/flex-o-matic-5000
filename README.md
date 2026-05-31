@@ -1,126 +1,112 @@
 # FLEX-O-MATIC 5000
 
-Turn a README or project note into **three short LinkedIn-style posts** (technical, story, lessons). Built with **Next.js**; your **NVIDIA API key stays on the server only**.
+I built this so I can paste project notes and get three usable LinkedIn posts fast:
 
-The Next.js app lives at the **repository root** (this folder). **Vercel:** leave **Root Directory** empty, or set it to **`.`** — do **not** use `web` (that path no longer exists).
+- Technical
+- Story
+- Lessons
 
----
+Live site: https://syllabuscal.ranjansharma.info.np
 
-## Fix Vercel `404 NOT_FOUND` (plain “The page could not be found”)
+## Recommended repository details
 
-That response is **Vercel’s edge** (`x-vercel-error: NOT_FOUND`), not the Next.js app. The build can succeed while the **production domain** doesn’t point at a live deployment.
+- Description: Turn project notes into 3 human sounding LinkedIn posts
+- Website: https://syllabuscal.ranjansharma.info.np
+- Topics: nextjs react typescript linkedin-post-generator nvidia-api vercel ai-writing
 
-### Checklist (in order)
+## What it looks like
 
-1. **Settings → General → Root Directory** → **empty** (not `web`, not a subfolder).
-2. **Settings → General → Build & Development Settings**
-   - **Framework Preset:** **Next.js**
-   - **Build Command:** leave default, or `npm run build`
-   - **Output Directory:** **leave empty** (must **not** be `.next`, `out`, or `dist` unless you know you need it).
-   - **Install Command:** leave default, or `npm install` / `npm ci`.
-3. **Deployments** → open the latest **Production · Ready** deployment → use the **Visit** button. If that URL works but `https://<project>.vercel.app` does not, it’s a **domain** issue (step 4).
-4. **Settings → Domains** → ensure **`<name>.vercel.app`** is listed and **Valid**; remove and re-add it if it’s stuck.
-5. **Git** → Production should track **`main`** and include the latest commit (we ship `next build --webpack` for reliable Vercel output).
-6. Pull latest **`main`** and **Redeploy** if your dashboard was on an old commit.
+![FLEX-O-MATIC 5000 live screenshot](https://github.com/user-attachments/assets/8e1e05c6-0397-44e4-af1d-a4bd4c056bbf)
 
-### Preview URLs return `401`
+## Product flow
 
-**Deployment Protection** is on for previews. Use the **production** domain, or temporarily allow unauthenticated previews in **Settings → Deployment Protection**.
-
----
-
-## Push to GitHub
-
-```bash
-git add -A
-git status   # .env.local and node_modules must NOT appear
-git commit -m "your message"
-git push
+```mermaid
+flowchart LR
+  A[Paste README or project notes] --> B[Click Forge 3 Posts]
+  B --> C[Client sends POST /api/forge]
+  C --> D[API validates origin, json, size, and input]
+  D --> E[Prompt builder picks tech, story, or lessons]
+  E --> F[NVIDIA chat completion API]
+  F --> G[Normalized output sent back]
+  G --> H[Three cards rendered with copy buttons]
 ```
 
-**Never commit** `.env.local` or API keys. Only `.env.example` is tracked (empty key).
+## System diagram
 
----
+```mermaid
+flowchart TB
+  subgraph Browser
+    UI[Retro Next.js UI]
+    Cards[Tech Story Lessons cards]
+  end
 
-## What's in the box
+  subgraph NextJsServer
+    Route[app/api/forge/route.ts]
+    Prompts[lib/prompts.ts]
+    NvidiaClient[lib/nvidia.ts]
+  end
 
-| Item | Purpose |
-|------|--------|
-| Retro UI | Marquee, “windows”, three output cards, copy buttons |
-| `POST /api/forge` | Server-side NVIDIA chat; `slot: tech \| story \| lessons` |
-| Social preview | `opengraph-image` / `twitter-image` (1200×630) + metadata |
-| Security | Same-origin when `Origin` is sent, JSON/size limits, HTTPS host allowlist, upstream timeout, security headers |
+  subgraph External
+    Nvidia[(NVIDIA Chat Completions API)]
+  end
 
----
-
-## Repo layout
-
+  UI --> Route
+  Route --> Prompts
+  Route --> NvidiaClient
+  NvidiaClient --> Nvidia
+  Route --> Cards
 ```
+
+## Repo structure
+
+```text
 .
-├── README.md
-├── .gitignore
-├── app/              # Next.js App Router
+├── app/
+│   ├── api/forge/route.ts
+│   ├── components/FlexOMatic.tsx
+│   ├── layout.tsx
+│   └── page.tsx
 ├── lib/
+│   ├── nvidia.ts
+│   ├── prompts.ts
+│   └── site-url.ts
 ├── public/
 ├── .env.example
 ├── package.json
-└── ...
+└── README.md
 ```
 
----
-
-## Local development
+## Local setup
 
 ```bash
 cp .env.example .env.local
-# Set NVIDIA_API_KEY in .env.local
+# add NVIDIA_API_KEY in .env.local
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open http://127.0.0.1:3000
 
----
+## Deploy notes
 
-## Deploy on Vercel
+For Vercel:
 
-1. Import this repo (or reconnect if already linked).
-2. **Root Directory:** leave **blank** (repo root).
-3. **Environment variables:** `NVIDIA_API_KEY`; `NEXT_PUBLIC_SITE_URL` (your live `https://…` URL); optional vars in `.env.example`.
-4. Deploy.
+1. Keep Root Directory empty
+2. Set `NVIDIA_API_KEY`
+3. Set `NEXT_PUBLIC_SITE_URL` to your deployed URL
+4. Deploy
 
-Link previews: [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/).
+## Security notes
 
----
-
-## Environment variables
-
-| Variable | Notes |
-|----------|--------|
-| `NVIDIA_API_KEY` | Server only. Required for Forge. |
-| `NEXT_PUBLIC_SITE_URL` | Public canonical URL for Open Graph. |
-| `NVIDIA_API_URL`, `NVIDIA_MODEL`, `NVIDIA_API_ALLOWED_HOST_SUFFIXES` | Optional — see `.env.example`. |
-
----
+- API key stays server side
+- `/api/forge` checks origin when provided
+- Request size and input length are capped
+- Upstream API host is restricted to trusted suffixes
 
 ## Scripts
 
-- `npm run dev` — dev server  
-- `npm run build` — production build  
-- `npm run start` — run production build locally  
-- `npm run lint` — ESLint  
-- `npm run audit` — `npm audit` (moderate+)  
-
----
-
-## Security checklist
-
-- [ ] No real `nvapi-*` strings in `.env.example` or source.  
-- [ ] `.env.local` is gitignored and never force-added.  
-- [ ] Secrets only in Vercel **Environment Variables**.  
-
----
-
-## License
-
-Your project — add a `LICENSE` file if you want explicit terms.
+- `npm run dev`
+- `npm run lint`
+- `npm run build`
+- `npm run start`
+- `npm run audit`
