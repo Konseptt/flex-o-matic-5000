@@ -1,0 +1,11 @@
+repository:
+  description: "Turn project notes into 3 human sounding LinkedIn posts"
+  homepage: "https://syllabuscal.ranjansharma.info.np"
+  topics:
+    - nextjs
+    - react
+    - typescript
+    - linkedin-post-generator
+    - nvidia-api
+    - vercel
+    - ai-writing
