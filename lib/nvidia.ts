@@ -3,6 +3,12 @@ import OpenAI from "openai";
 
 const MODEL = "moonshotai/kimi-k3";
 
+function usableReply(text: string | null | undefined): string {
+  const trimmed = text?.trim() ?? "";
+  if (!trimmed || /^!+$/.test(trimmed)) return "";
+  return trimmed;
+}
+
 function normalizeModelOutput(raw: string): string {
   let out = raw.trim();
   if (
@@ -33,8 +39,12 @@ export async function completeChat(userPrompt: string): Promise<string> {
     top_p: 0.95,
     max_tokens: 1024,
     stream: false,
-  });
+    reasoning_effort: "low",
+  } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
 
-  const content = completion.choices[0]?.message?.content ?? "";
+  const message = completion.choices[0]?.message as
+    | { content?: string | null; reasoning_content?: string | null }
+    | undefined;
+  const content = usableReply(message?.content) || usableReply(message?.reasoning_content);
   return normalizeModelOutput(String(content));
 }
