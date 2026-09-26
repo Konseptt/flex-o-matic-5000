@@ -1,7 +1,7 @@
 import "server-only";
 import OpenAI from "openai";
 
-const MODEL = "meta/llama-3.3-70b-instruct";
+const MODEL = "moonshotai/kimi-k3";
 
 function normalizeModelOutput(raw: string): string {
   let out = raw.trim();
@@ -29,8 +29,8 @@ export async function completeChat(userPrompt: string): Promise<string> {
   const completion = await client.chat.completions.create({
     model: MODEL,
     messages: [{ role: "user", content: userPrompt }],
-    temperature: 0.2,
-    top_p: 0.7,
+    temperature: 1,
+    top_p: 0.95,
     max_tokens: 1024,
     stream: false,
   });
